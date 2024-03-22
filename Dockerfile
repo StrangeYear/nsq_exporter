@@ -1,12 +1,12 @@
-FROM alpine:latest
+FROM golang:1.22.1-alpine as builder
+WORKDIR /go
+ADD go.mod go.sum /go/
+RUN go mod download
+ADD . /go
+RUN GOOS=linux GOARCH=amd64 go build -o /go/nsq_exporter
 
+FROM alpine:3.19
+WORKDIR /app
+COPY --from=builder /go/nsq_exporter /nsq_exporter
 EXPOSE 9117
-
-ENV  GOPATH /go
-ENV APPPATH $GOPATH/src/github.com/lovoo/nsq_exporter
-COPY . $APPPATH
-RUN apk add --update -t build-deps go git mercurial libc-dev gcc libgcc \
-    && cd $APPPATH && go get -d && go build -o /nsq_exporter \
-    && apk del --purge build-deps && rm -rf $GOPATH
-
 ENTRYPOINT ["/nsq_exporter"]

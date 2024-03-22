@@ -14,7 +14,7 @@ deps-init:
 	$(GOPATH)/bin/govendor init
 
 deps-get: deps-init
-	@$(GOPATH)/bin/govendor get github.com/lovoo/nsq_exporter
+	@$(GOPATH)/bin/govendor get github.com/StrangeYear/nsq_exporter
 
 .PHONY: clean
 clean:
@@ -27,4 +27,12 @@ test:
 .PHONY: release-build
 release-build:
 	@go get -u github.com/mitchellh/gox
-	@$(GOX) $(GOX_ARGS) github.com/lovoo/nsq_exporter
+	@$(GOX) $(GOX_ARGS) github.com/StrangeYear/nsq_exporter
+
+.PHONY: build-image
+build-image: IMAGE = stubbornmomoko/nsq_exporter:$(TAG)
+build-image:
+	docker buildx build --platform linux/amd64 -t stubbornmomoko/nsq_exporter:2.0.3 .
+	docker push stubbornmomoko/nsq_exporter:2.0.3
+	docker tag stubbornmomoko/nsq_exporter:2.0.3 stubbornmomoko/nsq_exporter:latest
+	docker push stubbornmomoko/nsq_exporter:latest
